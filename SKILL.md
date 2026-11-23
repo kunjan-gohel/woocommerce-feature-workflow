@@ -88,6 +88,8 @@ Senior checks before choosing an approach:
 - Pick the technique in this order: settings/editor options → hooks/filters → scoped CSS → builder/Site Editor template → template override (last resort).
 - If a design (Figma/screenshot) is given, map each section to its rendering method and list gaps before building (section 10).
 - Deliver: what changes where (setting, hook, CSS file, template), the code, and screenshots or steps to compare with the design.
+- Check the known gotchas (section 1c) before delivering.
+- Test by measuring each page at 1920, 1440 and 375px (overflow, header overlap, left-edge alignment, sizes, colors), then screenshots.
 - Finish with a side-by-side comparison against an existing site page and the storefront design QA checklist (section 11) for every page touched.
 
 ## 3. Debug
