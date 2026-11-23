@@ -105,6 +105,27 @@ Container       1200px, 20px side padding; sections 80px (desktop) / 48px (mobil
 
 **Step 5: compare side by side.** Screenshot an existing site page and the WooCommerce page at desktop and mobile; headings, buttons, inputs, spacing and colors must look like the same site. Fix differences, then run the QA checklist.
 
+## 1c. Known gotchas (found in real tests)
+
+Check these before calling a storefront design done. Each one came up on a real Elementor + Hello theme build.
+
+| Gotcha | Symptom | Fix |
+|---|---|---|
+| Elementor lazy-load | Computed `background-image` reads `none` on buttons/sections below the fold | Read the real values from the kit CSS (`post-{kitId}.css`, rules starting `.elementor-kit-{id}`) instead of computed styles |
+| Overlay (absolute/transparent) header | Header covers the breadcrumb/title; white top-bar text is invisible on light WooCommerce pages | Add a dark band (breadcrumb / products header / `.page-header`) with `padding-top` = header height per breakpoint, styled like the site's page hero |
+| Full-bleed band with `100vw` | Horizontal scrollbar, text not aligned to the container | Keep the element in the container and paint outside it: `box-shadow: 0 0 0 100vmax <color>; clip-path: inset(0 -100vmax);` |
+| Hello theme `.alignwide` | Block cart/checkout pushed off-screen (`margin: 0 -80px`) | `.site-main .alignwide { margin-inline: 0; max-width: 100%; }` |
+| Hello theme `.page-header .entry-title` | Page title indented vs content (max-width 1140px + side margins) | `max-width: none; margin: 0;` |
+| Hello `reset.css` | Pink links (`#c36`), striped/gray tables, italic attribute values | Set link color, clear table backgrounds, `font-style: normal` on `.shop_attributes td` |
+| WooCommerce specificity | Loop prices stay olive; active tab keeps a white box | Target `ul.products li.product .price` and `.woocommerce-tabs ul.tabs li.active` explicitly |
+| Blocks field specificity | Checkout fields stay rounded | Use `.wc-block-components-text-input input:is([type="text"], [type="email"], …)` |
+| Kit input styles leak into blocks | Double border inside the Blocks quantity selector | Remove border on `.wc-block-components-quantity-selector__input` |
+| Classic add-to-cart row | Quantity box and button different heights / misaligned | `form.cart { display: flex; align-items: stretch; gap: 16px; }`, remove floats |
+| AJAX "View cart" | Heavy boxed link under the button on product cards | Style as the site's text/arrow link |
+| Result count + sorting | Text and dropdown on different baselines | Same vertical padding/line-height on both |
+
+**How to test (fast and repeatable):** load each WooCommerce page in hidden iframes at 1920, 1440 and 375px and measure with JS: horizontal overflow, header bottom vs first content top, title left edge vs content left edge, button/field heights, colors against the token table. Then take screenshots for the visual check.
+
 ## 2. Styling rules
 
 - Scope every rule to the page's body class so nothing leaks:
@@ -345,6 +366,9 @@ My Account
 - [ ] Logged-out access redirects correctly
 
 Everywhere
+- [ ] Header and top bar readable (overlay headers need a dark band behind them); nothing hidden under the header
+- [ ] Page titles, breadcrumbs and content share the same left edge at every breakpoint
+- [ ] Pagination, attributes table, AJAX "View cart" link and quantity + button row are styled
 - [ ] Matches the existing site design: headings, buttons, inputs, colors, spacing and container width look like the site's other pages (side-by-side screenshots, desktop and mobile)
 - [ ] Uses the site's global tokens/variables, not hard-coded copies, wherever a global exists
 - [ ] No console errors; no layout shift; images sized
