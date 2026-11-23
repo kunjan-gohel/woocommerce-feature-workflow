@@ -1,6 +1,6 @@
 ---
 name: woocommerce-feature-workflow
-description: Senior WooCommerce engineer workflow for building, debugging, reviewing and testing WooCommerce features end to end (PHP, hooks, CRUD/HPOS, REST API, webhooks, AJAX, Blocks checkout, frontend). Use for any WooCommerce task, bug, integration, code review or test plan.
+description: Senior WooCommerce engineer workflow for building, designing, debugging, reviewing and testing WooCommerce features end to end (PHP, hooks, CRUD/HPOS, REST API, webhooks, AJAX, Blocks checkout, and storefront design of shop, product, cart, checkout and My Account pages). Use for any WooCommerce task, design change, bug, integration, code review or test plan.
 ---
 
 # WooCommerce Feature Workflow
@@ -19,6 +19,7 @@ This skill is self-contained. Load the reference file that matches the task:
 | AJAX, enqueueing JS, cart/checkout JS events, Blocks checkout JS, frontend and accessibility rules | `references/ajax-frontend.md` |
 | Sanitizing, escaping, nonces, capabilities, SQL, IDOR, secrets, PII | `references/security.md` |
 | Debugging steps, common WooCommerce symptoms and causes, WP-CLI commands | `references/debugging.md` |
+| Frontend design of Shop, Product, Cart, Checkout, My Account; theme/builder detection; design QA | `references/storefront-design.md` |
 
 Load `security.md` for every Build and Review task, plus whichever others the task touches.
 
@@ -38,6 +39,7 @@ Load `security.md` for every Build and Review task, plus whichever others the ta
 |---|---|
 | A task, client request, or ticket | 1 → Breakdown |
 | "build", "write the code", "implement" | 2 → Build |
+| A design, Figma, screenshot, "change the layout/look" of a store page | 2D → Design |
 | An error, "not working", white screen, wrong totals | 3 → Debug |
 | "review", "check my code", "before PR/QA" | 4 → Review |
 | "test cases", "QA steps" | 5 → Tests |
@@ -53,7 +55,7 @@ Output this before writing any code, then wait for the OK:
 
 ```
 Task: <one line>
-Environment: <staging URL, WP/WC/PHP versions, theme, checkout: classic or Blocks, HPOS on/off>
+Environment: <staging URL, WP/WC/PHP versions, theme (classic/block), page builder, checkout: classic or Blocks, HPOS on/off>
 What the client wants: <plain words>
 Approach: <2–5 bullets: hooks/endpoints/files, where the code lives, why this approach>
 Alternatives considered: <1 line each, why not>
@@ -67,6 +69,7 @@ Senior checks before choosing an approach:
 
 - **Blocks or classic checkout?** Classic PHP hooks (`woocommerce_checkout_fields`, `woocommerce_after_checkout_validation`) do not run on Block checkout.
 - **HPOS on?** Affects admin order screens, list-table hooks and any direct queries.
+- **For design work: how is the page rendered?** Classic theme, block theme, Elementor/Divi template, Blocks or shortcode cart/checkout (see `storefront-design.md` section 1).
 - **Is there a WooCommerce setting or existing extension that already does this?** Say so before writing custom code.
 - **Will it survive updates?** No edits to plugin files; template overrides only when hooks can't do it.
 
@@ -77,6 +80,14 @@ Senior checks before choosing an approach:
 - Follow the patterns in the references: plugin bootstrap and HPOS declaration (`woocommerce-core.md`), REST/webhook handling (`rest-webhooks.md`), AJAX/JS (`ajax-frontend.md`), and always `security.md`.
 - Add `wc_get_logger()` logging at integration boundaries (source = plugin slug), never logging secrets or full PII.
 - After the code, list: **files changed**, **how to enable/configure**, **how to roll back**.
+
+## 2D. Design (storefront pages)
+
+- Load `references/storefront-design.md`. Start with section 1 (how the page is rendered) and state the result.
+- Pick the technique in this order: settings/editor options → hooks/filters → scoped CSS → builder/Site Editor template → template override (last resort).
+- If a design (Figma/screenshot) is given, map each section to its rendering method and list gaps before building (section 10).
+- Deliver: what changes where (setting, hook, CSS file, template), the code, and screenshots or steps to compare with the design.
+- Finish with the storefront design QA checklist (section 11) for every page touched.
 
 ## 3. Debug
 
@@ -91,7 +102,7 @@ Check:
 - **Security:** run the full checklist at the end of `security.md`.
 - **WooCommerce:** CRUD only, HPOS-safe, compatibility declared (plugin), works with the site's checkout type, prices via `wc_price()`/`wc_get_price_to_display()` (respects tax display), translatable strings with the right text domain, no edits to third-party files.
 - **Performance:** no queries inside loops (N+1), no unbounded `wc_get_orders`/`wc_get_products` (`limit => -1`) on frontend requests, assets only where needed, heavy work moved to Action Scheduler, transients/object cache where repeat reads are expensive.
-- **Quality:** prefixed names, single responsibility, no dead/commented-out code, no PHP notices in `debug.log`, no console errors, frontend checklist in `ajax-frontend.md` passes.
+- **Quality:** prefixed names, single responsibility, no dead/commented-out code, no PHP notices in `debug.log`, no console errors, frontend checklist in `ajax-frontend.md` passes; for design changes, the storefront QA checklist in `storefront-design.md` passes and CSS is scoped to WooCommerce pages.
 
 ## 5. Tests
 
@@ -123,6 +134,7 @@ Task types: Custom feature · REST/API integration · Bug fix · Tests & docs. S
 
 - **Breakdown:** "Use woocommerce-feature-workflow. Task: <paste>. WC <ver>, <classic/Blocks> checkout, HPOS <on/off>. Breakdown only."
 - **Build:** "Approach approved. Build as site plugin `<slug>`, prefix `<prefix>_`. Full files with paths."
+- **Design:** "Design mode. Page: <shop/product/cart/checkout/account>. Design: <Figma link or screenshot>. Theme/builder: <…>."
 - **Debug:** "Debug mode. Symptom: <…>. Steps: <…>. Log: <paste, secrets removed>."
 - **Review:** "Review mode. <paste code or diff>."
 - **Tests:** "Write test cases for: <feature>."
