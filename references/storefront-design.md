@@ -126,6 +126,7 @@ Check these before calling a storefront design done. Each one came up on a real 
 | Product reviews form | Gray default Submit (`#respond input#submit`), boxed textarea, browser checkbox | Style `#respond input#submit` as the primary button; fields as site fields; `accent-color` on checkboxes; Name/Email in two columns on desktop |
 | Global focus outline | Site's thick black `:focus-visible` box on selects/fields looks broken on underline-style fields | Replace with a visible brand focus (e.g. primary underline `box-shadow: 0 1px 0 0 primary`), never remove focus without a replacement |
 | Two stacked band elements | Thin light line between breadcrumb band and title band (anti-aliasing seam) | Paint with `border-image: linear-gradient(c, c) fill 0 / 0 / 0 100vmax` and overlap the second element by 2px (`margin-top: -2px; padding-top: 2px`) |
+| Site-wide input styles on radios/checkboxes | Kit rule `input:not([type=button])` gives Blocks radios/checkboxes padding + bottom border: payment options and "Add a note" show as short underlines, no circle/box | Reset `.wc-block-components-radio-control__input` and `.wc-block-components-checkbox__input` (20px, padding 0, full border, radius 50% / 2px), checked color = primary, selected payment box border = primary. Check every checkbox/radio in cart, checkout, account, reviews |
 
 **How to test (fast and repeatable):** load each WooCommerce page in hidden iframes at 1920, 1440 and 375px and measure with JS: horizontal overflow, header bottom vs first content top, title left edge vs content left edge, button/field heights, colors against the token table. Then take screenshots for the visual check.
 
@@ -361,7 +362,7 @@ Cart
 Checkout
 - [ ] Guest and logged-in, saved address, ship to different address
 - [ ] Validation errors visible and announced; field order and widths match the design
-- [ ] Payment method selection, terms checkbox, place-order loading state
+- [ ] Payment method selection (radios look like radios, selected box in brand color), terms/notes checkboxes, place-order loading state
 - [ ] Thank-you page layout and order details
 
 My Account
