@@ -113,7 +113,7 @@ Check these before calling a storefront design done. Each one came up on a real 
 |---|---|---|
 | Elementor lazy-load | Computed `background-image` reads `none` on buttons/sections below the fold | Read the real values from the kit CSS (`post-{kitId}.css`, rules starting `.elementor-kit-{id}`) instead of computed styles |
 | Overlay (absolute/transparent) header | Header covers the breadcrumb/title; white top-bar text is invisible on light WooCommerce pages | Add a dark band (breadcrumb / products header / `.page-header`) with `padding-top` = header height per breakpoint, styled like the site's page hero |
-| Full-bleed band with `100vw` | Horizontal scrollbar, text not aligned to the container | Keep the element in the container and paint outside it: `box-shadow: 0 0 0 100vmax <color>; clip-path: inset(0 -100vmax);` |
+| Full-bleed band with `100vw` | Horizontal scrollbar, text not aligned to the container | Keep the element in the container and paint outside it with `border-image: linear-gradient(c, c) fill 0 / 0 / 0 100vmax;` (one paint layer, no seam, no overflow) |
 | Hello theme `.alignwide` | Block cart/checkout pushed off-screen (`margin: 0 -80px`) | `.site-main .alignwide { margin-inline: 0; max-width: 100%; }` |
 | Hello theme `.page-header .entry-title` | Page title indented vs content (max-width 1140px + side margins) | `max-width: none; margin: 0;` |
 | Hello `reset.css` | Pink links (`#c36`), striped/gray tables, italic attribute values | Set link color, clear table backgrounds, `font-style: normal` on `.shop_attributes td` |
@@ -123,6 +123,9 @@ Check these before calling a storefront design done. Each one came up on a real 
 | Classic add-to-cart row | Quantity box and button different heights / misaligned | `form.cart { display: flex; align-items: stretch; gap: 16px; }`, remove floats |
 | AJAX "View cart" | Heavy boxed link under the button on product cards | Style as the site's text/arrow link |
 | Result count + sorting | Text and dropdown on different baselines | Same vertical padding/line-height on both |
+| Product reviews form | Gray default Submit (`#respond input#submit`), boxed textarea, browser checkbox | Style `#respond input#submit` as the primary button; fields as site fields; `accent-color` on checkboxes; Name/Email in two columns on desktop |
+| Global focus outline | Site's thick black `:focus-visible` box on selects/fields looks broken on underline-style fields | Replace with a visible brand focus (e.g. primary underline `box-shadow: 0 1px 0 0 primary`), never remove focus without a replacement |
+| Two stacked band elements | Thin light line between breadcrumb band and title band (anti-aliasing seam) | Paint with `border-image: linear-gradient(c, c) fill 0 / 0 / 0 100vmax` and overlap the second element by 2px (`margin-top: -2px; padding-top: 2px`) |
 
 **How to test (fast and repeatable):** load each WooCommerce page in hidden iframes at 1920, 1440 and 375px and measure with JS: horizontal overflow, header bottom vs first content top, title left edge vs content left edge, button/field heights, colors against the token table. Then take screenshots for the visual check.
 
@@ -349,7 +352,7 @@ Product detail
 - [ ] Gallery zoom/lightbox/slider, thumbnails and single-image products
 - [ ] Variable product: no selection, invalid combination, selected variation price/stock/image update
 - [ ] Out of stock, backorder, sale price, quantity limits
-- [ ] Tabs, related/upsell products, reviews (if enabled)
+- [ ] Tabs, related/upsell products, reviews list and the review form (logged out: name/email fields, submit, validation)
 
 Cart
 - [ ] Empty cart state, quantity change, remove item, coupon success and error, cross-sells
@@ -372,6 +375,6 @@ Everywhere
 - [ ] Matches the existing site design: headings, buttons, inputs, colors, spacing and container width look like the site's other pages (side-by-side screenshots, desktop and mobile)
 - [ ] Uses the site's global tokens/variables, not hard-coded copies, wherever a global exists
 - [ ] No console errors; no layout shift; images sized
-- [ ] Keyboard navigation and visible focus; contrast at least 4.5:1
+- [ ] Keyboard navigation and visible focus (brand-styled, not the browser/theme default box); contrast at least 4.5:1
 - [ ] CSS scoped to WooCommerce pages; nothing changed on non-store pages
 - [ ] Tested in Chrome and one other browser
