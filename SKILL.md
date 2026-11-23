@@ -84,10 +84,11 @@ Senior checks before choosing an approach:
 ## 2D. Design (storefront pages)
 
 - Load `references/storefront-design.md`. Start with section 1 (how the page is rendered) and state the result.
+- **Match the existing site design** (section 1b): extract the site's design tokens (colors, typography, buttons, forms, layout) from existing pages, find their source (Elementor Site Settings, theme.json, theme variables), show a token table, and style WooCommerce pages from those globals. A client-supplied design overrides the site style.
 - Pick the technique in this order: settings/editor options → hooks/filters → scoped CSS → builder/Site Editor template → template override (last resort).
 - If a design (Figma/screenshot) is given, map each section to its rendering method and list gaps before building (section 10).
 - Deliver: what changes where (setting, hook, CSS file, template), the code, and screenshots or steps to compare with the design.
-- Finish with the storefront design QA checklist (section 11) for every page touched.
+- Finish with a side-by-side comparison against an existing site page and the storefront design QA checklist (section 11) for every page touched.
 
 ## 3. Debug
 
