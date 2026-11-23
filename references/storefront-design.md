@@ -129,8 +129,16 @@ Check these before calling a storefront design done. Each one came up on a real 
 | Site-wide input styles on radios/checkboxes | Kit rule `input:not([type=button])` gives Blocks radios/checkboxes padding + bottom border: payment options and "Add a note" show as short underlines, no circle/box | Reset `.wc-block-components-radio-control__input` and `.wc-block-components-checkbox__input` (20px, padding 0, full border, radius 50% / 2px), checked color = primary, selected payment box border = primary. Check every checkbox/radio in cart, checkout, account, reviews |
 | "Added to cart" notice | Orange/blue ring around the whole notice (WooCommerce focuses it with `tabindex=-1`), default gray "View cart" button | `outline: none` on the notice's `:focus` only (not interactive; screen readers still get it); style the notice `.button` as the site's outline button; flex the notice so the button sits right |
 | Variation "Clear" link | The row with the Clear link is taller, so its label sits lower than the select | `td.value { position: relative }` and `.reset_variations { position: absolute; bottom: 0 }`; check label vs select centers match |
+| Notice icon position | Check icon sits at the top while text and button are centered in a taller notice | At tablet/desktop `::before { top: 50%; transform: translateY(-50%) }`; on phones (button wraps) keep it on the first text line |
+| Grouped product form | Add-to-cart flex row puts the grouped table and button side by side; on phones the button stretches tall and is cut off | `form.cart.grouped_form { flex-direction: column; align-items: flex-start }`, table `width: 100%`, clear the gray `td` stripes |
+| Blocks cart quantity selector | Kit input styles shrink it to ~20px with faint +/- | Selector `height: 40px`, input `height: 100%; padding: 0; border: 0`, buttons `min-width: 36px`, dark color |
+| Show-password toggle (My Account) | Eye icon sits in an orange gradient box because site button styles hit every `button` | `.show-password-input { background: transparent; background-image: none; }` |
+| Flex on WooCommerce `.form-row` | Login button shifted right, "Remember me" drops below | `.form-row` has clearfix `::before/::after` that become flex items; hide them when making the row flex |
+| Product tabs on phones | Tabs stack as a vertical list | `ul.tabs { display: flex; flex-wrap: wrap; gap }` under 768px |
 
 **How to test (fast and repeatable):** load each WooCommerce page in hidden iframes at 1920, 1440 and 375px and measure with JS: horizontal overflow, header bottom vs first content top, title left edge vs content left edge, button/field heights, colors against the token table. Then take screenshots for the visual check.
+
+**Responsive sweep (do this before handoff):** run `scripts/responsive-sweep.js` (Playwright) against staging at 375, 768, 1024 and 1440px. It loads shop, category, product, My Account (logged out), empty cart, filled cart and checkout, prints horizontal overflow and tap targets under 32px, and saves full-page screenshots. Review every screenshot, not just the numbers: overflow can be hidden by `overflow: hidden` and still cut content (the grouped-product button was cut with overflow = 0). Include a simple, a variable and a grouped product. Test injected CSS first with `page.addStyleTag()`, then publish.
 
 ## 2. Styling rules
 
@@ -348,11 +356,13 @@ Block templates (Site Editor) and builder templates are not PHP overrides; they 
 
 Shop / category
 - [ ] Card layout, image ratio and spacing match the design at phone, tablet, desktop
+- [ ] Responsive sweep at 375 / 768 / 1024 / 1440: no overflow, nothing cut off, tap targets at least 40px (quantity, buttons), screenshots reviewed
 - [ ] Sale badge, out-of-stock state, variable ("Select options") and external product buttons look right
 - [ ] Sorting, pagination, filters and "no products found" state work and are styled
 
 Product detail
 - [ ] Gallery zoom/lightbox/slider, thumbnails and single-image products
+- [ ] Grouped and external products (grouped table + button on phones)
 - [ ] Variable product: no selection, invalid combination, selected variation price/stock/image update; labels level with selects when "Clear" shows
 - [ ] Add to cart: success notice (no focus ring box, styled "View cart" button) and error notice
 - [ ] Out of stock, backorder, sale price, quantity limits
@@ -369,7 +379,7 @@ Checkout
 - [ ] Thank-you page layout and order details
 
 My Account
-- [ ] Login/register, dashboard, orders list and single order, addresses, account details, any custom tab
+- [ ] Login/register, dashboard, orders list and single order, addresses, account details, any custom tab; show-password icon and "Remember me" aligned
 - [ ] Logged-out access redirects correctly
 
 Everywhere
