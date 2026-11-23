@@ -14,14 +14,26 @@ The skill walks Claude through six modes:
 5. **Tests**: test cases for guest and logged-in users, product types, totals, nonces, mobile and API failures
 6. **Handoff**: an Orbit summary plus a time-log row (quoted vs actual AI-assisted hours)
 
-It builds on two existing skills instead of repeating them:
+It works at the standard of a **senior WooCommerce engineer (8–10+ years)** and is fully self-contained. It needs no other skills, so it works in any Claude account.
 
-- `wordpress-expert` for WooCommerce, security, coding standards and JS reference code
-- `wliq-dev-baseline` for frontend standards and the §17 pre-QA self-check
+## Structure
+
+```
+woocommerce-feature-workflow/
+├── SKILL.md                      # Workflow, modes, review & test standards
+└── references/
+    ├── woocommerce-core.md       # Plugin skeleton, CRUD/HPOS, hooks, Blocks vs classic, performance
+    ├── rest-webhooks.md          # REST endpoints, Store API, webhooks, API clients, retries
+    ├── ajax-frontend.md          # AJAX, JS events, Blocks JS, frontend & accessibility rules
+    ├── security.md               # Sanitize/escape, nonces, capabilities, SQL, secrets, checklist
+    └── debugging.md              # Debug steps, symptom → cause table, WP-CLI
+```
 
 ## Install
 
-In Claude, go to **Settings → Capabilities → Skills**, upload `SKILL.md` (or a zip of this folder), and turn it on.
+1. Download the zip from Releases (or **Code → Download ZIP**, then make sure the zip contains the `woocommerce-feature-workflow/` folder with `SKILL.md` at its root).
+2. In Claude, go to **Settings → Capabilities → Skills → Upload skill**, choose the zip, and turn it on.
+3. Org admins can share it with the whole team from the same place.
 
 ## Prompt starters
 
@@ -39,4 +51,4 @@ In Claude, go to **Settings → Capabilities → Skills**, upload `SKILL.md` (or
 
 ## Status
 
-v1 is part of the WLIQ Pod B AI plan (Dec 31 goal). It will be refined after it's used on real WooCommerce tasks.
+v2: self-contained, senior-level standard. Part of the WLIQ Pod B AI plan (Dec 31 goal); refined as it is used on real WooCommerce tasks.
