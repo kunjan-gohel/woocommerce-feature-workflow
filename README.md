@@ -30,6 +30,8 @@ woocommerce-feature-workflow/
     ├── security.md               # Sanitize/escape, nonces, capabilities, SQL, secrets, checklist
     ├── debugging.md              # Debug steps, symptom → cause table, WP-CLI
     └── storefront-design.md      # Shop/product/cart/checkout/account design, theme & builder detection, design QA
+scripts/
+└── responsive-sweep.js           # Playwright sweep: overflow, small tap targets, full-page screenshots per width
 ```
 
 ## Install
@@ -54,4 +56,4 @@ woocommerce-feature-workflow/
 
 ## Status
 
-v3.1: self-contained, senior-level standard, with storefront design that matches the existing site. Part of the WLIQ Pod B AI plan (Dec 31 goal); refined as it is used on real WooCommerce tasks.
+v3.6: self-contained, senior-level standard, with storefront design that matches the existing site, 20+ known gotchas from real tests, and a responsive sweep script. Part of the WLIQ Pod B AI plan (Dec 31 goal); refined as it is used on real WooCommerce tasks.
