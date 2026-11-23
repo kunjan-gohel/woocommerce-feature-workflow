@@ -14,7 +14,7 @@ The skill walks Claude through six modes:
 5. **Tests**: test cases for guest and logged-in users, product types, totals, nonces, mobile and API failures
 6. **Handoff**: an Orbit summary plus a time-log row (quoted vs actual AI-assisted hours)
 
-Plus a **Design mode** for the storefront: Shop, Product detail, Cart, Checkout and My Account pages, on classic themes, block themes or Elementor, with a design QA checklist.
+Plus a **Design mode** for the storefront: Shop, Product detail, Cart, Checkout and My Account pages, on classic themes, block themes or Elementor. It matches the existing site design (pulls colors, fonts, buttons, forms and spacing from the site's global settings) and ends with a design QA checklist.
 
 It works at the standard of a **senior WooCommerce engineer (8–10+ years)** and is fully self-contained. It needs no other skills, so it works in any Claude account.
 
@@ -54,4 +54,4 @@ woocommerce-feature-workflow/
 
 ## Status
 
-v3: self-contained, senior-level standard, with storefront design. Part of the WLIQ Pod B AI plan (Dec 31 goal); refined as it is used on real WooCommerce tasks.
+v3.1: self-contained, senior-level standard, with storefront design that matches the existing site. Part of the WLIQ Pod B AI plan (Dec 31 goal); refined as it is used on real WooCommerce tasks.
