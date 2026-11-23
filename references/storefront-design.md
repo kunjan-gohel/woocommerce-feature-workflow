@@ -22,6 +22,89 @@ Then choose, in this order of preference:
 4. **Builder template** (Elementor Theme Builder / Site Editor template) for layout changes
 5. **Template override** only when markup must change and hooks can't do it
 
+## 1b. Match the existing site design
+
+WooCommerce pages must look like the rest of the site. Do this before styling anything. If the client supplied a separate Figma/design, that design wins and the site style only fills gaps.
+
+**Step 1: extract the site's design tokens** from 2–3 existing non-store pages (home, about, contact), at desktop and mobile:
+
+| Token | What to capture |
+|---|---|
+| Colors | primary, secondary, accent, text, headings, links (normal/hover), background, borders |
+| Typography | font families; H1–H4 and body size, weight, line height, letter spacing, text transform |
+| Buttons | background, text color, radius, padding, border, hover/focus states, font weight/case |
+| Forms | input height, padding, border, radius, focus style, label style, error color |
+| Layout | container max-width, side padding, section spacing, grid gap |
+| Components | card style (shadow, radius, border), badges, dividers, icons |
+
+Quick extraction in the browser console on an existing page. Run it at a **desktop width (1280px or wider)** and again at **mobile (375px)**, because sizes and container widths change per breakpoint. Sample a normal content section, not only the hero (heroes often use white text on images):
+
+```js
+( () => {
+	const visible = ( el ) => { const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0 && ! el.closest( '#wpadminbar' ); };
+	const first = ( sel, test = () => true ) => [ ...document.querySelectorAll( sel ) ].find( ( el ) => visible( el ) && test( getComputedStyle( el ) ) );
+	const read = ( el, props ) => el ? Object.fromEntries( props.map( ( p ) => [ p, getComputedStyle( el ).getPropertyValue( p ).trim() ] ) ) : null;
+	const solid = ( cs ) => ! /rgba\(0, 0, 0, 0\)|transparent/.test( cs.backgroundColor );
+	const type = [ 'font-family', 'font-size', 'font-weight', 'line-height', 'letter-spacing', 'text-transform', 'color' ];
+	// Site tokens only: Elementor globals, block-theme presets, layout sizes. Skips Elementor admin (--e-a-*) and WP admin vars.
+	const keep = /^--(e-global-|wp--preset--(color|font-family|font-size|spacing)--|wp--style--global--|container-max-width|content-width)/;
+	const anyCon = document.querySelector( '.e-con' );
+	return {
+		h1: read( first( 'h1' ), type ),
+		h2: read( first( 'h2' ), type ),
+		h3: read( first( 'h3' ), type ),
+		body: read( document.body, type.concat( 'background-color' ) ),
+		paragraph: read( first( 'main p, .elementor-widget-text-editor p, p' ), type ),
+		link: read( first( 'main p a, .elementor-widget-text-editor a, .entry-content a' ), [ 'color', 'text-decoration' ] ),
+		buttonSolid: read( first( '.elementor-button, .wp-element-button, .button, button[type="submit"]', solid ), type.concat( 'background-color', 'border-radius', 'padding', 'border' ) ),
+		input: read( first( 'input[type="text"], input[type="email"], input[type="tel"], textarea', ( cs ) => parseFloat( cs.height ) >= 30 ), [ 'height', 'padding', 'border', 'border-radius', 'font-size', 'background-color' ] ),
+		container: read( first( '.e-con-boxed > .e-con-inner, .elementor-section-boxed > .elementor-container, .is-layout-constrained > *, .container', ( cs ) => cs.maxWidth !== 'none' && cs.maxWidth !== '100%' ), [ 'max-width', 'padding-left', 'padding-right' ] ),
+		elementorContentWidth: anyCon ? getComputedStyle( anyCon ).getPropertyValue( '--content-width' ).trim() : null,
+		measuredContentWidth: ( () => { const el = first( '.e-con-boxed > .e-con-inner, .elementor-section-boxed > .elementor-container, .is-layout-constrained > *, .container, main' ); return el ? Math.round( el.getBoundingClientRect().width ) + 'px of ' + innerWidth + 'px viewport' : null; } )(),
+		globals: [ ...document.styleSheets ].flatMap( ( ss ) => { try { return [ ...ss.cssRules ]; } catch ( e ) { return []; } } )
+			.filter( ( r ) => r.style && ( r.selectorText === ':root' || r.selectorText === 'body' || ( r.selectorText || '' ).includes( '.elementor-kit-' ) ) )
+			.flatMap( ( r ) => [ ...r.style ].filter( ( n ) => keep.test( n ) ).map( ( n ) => n + ': ' + r.style.getPropertyValue( n ).trim() ) )
+			.filter( ( v, i, a ) => a.indexOf( v ) === i ),
+	};
+} )();
+```
+
+**Step 2: find where each token is defined** and reuse that source instead of copying raw values:
+
+| Site built with | Source of truth | Use in CSS |
+|---|---|---|
+| Elementor | Site Settings → Global Colors / Global Fonts / Buttons / Form Fields / Layout | `var(--e-global-color-primary)`, `var(--e-global-typography-primary-font-family)`, etc. (names from the kit CSS) |
+| Block theme | `theme.json` / Global Styles | `var(--wp--preset--color--<slug>)`, `var(--wp--preset--font-family--<slug>)`, `var(--wp--preset--spacing--<slug>)` |
+| Classic theme | Customizer / theme options / theme CSS variables | the theme's own variables or Customizer settings; raw values only if none exist |
+
+Set as much as possible **globally** (Elementor Site Settings buttons/forms, Global Styles element styles) so WooCommerce buttons, inputs and headings inherit automatically. Write CSS only for what the global settings can't reach.
+
+**Step 3: write a token table** in the Breakdown, for example:
+
+```
+Primary color   #C8102E   → var(--e-global-color-primary)
+Heading font    Oswald 700 uppercase → var(--e-global-typography-primary-font-family)
+Body            Roboto 16px / 1.6
+Button          radius 4px, padding 14px 28px, hover = secondary color
+Input           48px high, 1px #D0D0D0, radius 4px, focus = primary
+Container       1200px, 20px side padding; sections 80px (desktop) / 48px (mobile)
+```
+
+**Step 4: map WooCommerce elements to the tokens.** Typical mapping:
+
+| WooCommerce element | Match to site's |
+|---|---|
+| Product titles, page titles, section headings | H1–H3 styles |
+| Prices | body/heading font, primary or text color; sale `ins` in primary/accent, `del` muted |
+| Add to cart, Proceed to checkout, Place order, block buttons | primary button style incl. hover/focus |
+| Secondary actions (View cart, Apply coupon) | secondary/outline button style |
+| Quantity, coupon, checkout and account inputs, selects | site form field style |
+| Product cards, cart/checkout panels, account boxes | site card style and spacing |
+| Notices | site colors for success/info/error with enough contrast |
+| Shop/product/cart/checkout containers | site container width and section spacing |
+
+**Step 5: compare side by side.** Screenshot an existing site page and the WooCommerce page at desktop and mobile; headings, buttons, inputs, spacing and colors must look like the same site. Fix differences, then run the QA checklist.
+
 ## 2. Styling rules
 
 - Scope every rule to the page's body class so nothing leaks:
@@ -262,6 +345,8 @@ My Account
 - [ ] Logged-out access redirects correctly
 
 Everywhere
+- [ ] Matches the existing site design: headings, buttons, inputs, colors, spacing and container width look like the site's other pages (side-by-side screenshots, desktop and mobile)
+- [ ] Uses the site's global tokens/variables, not hard-coded copies, wherever a global exists
 - [ ] No console errors; no layout shift; images sized
 - [ ] Keyboard navigation and visible focus; contrast at least 4.5:1
 - [ ] CSS scoped to WooCommerce pages; nothing changed on non-store pages
