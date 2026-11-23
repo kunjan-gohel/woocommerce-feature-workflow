@@ -89,7 +89,7 @@ Senior checks before choosing an approach:
 - If a design (Figma/screenshot) is given, map each section to its rendering method and list gaps before building (section 10).
 - Deliver: what changes where (setting, hook, CSS file, template), the code, and screenshots or steps to compare with the design.
 - Check the known gotchas (section 1c) before delivering.
-- Test by measuring each page at 1920, 1440 and 375px (overflow, header overlap, left-edge alignment, sizes, colors), then screenshots.
+- Test by measuring each page at 1920, 1440 and 375px (overflow, header overlap, left-edge alignment, sizes, colors), then screenshots. Before handoff run the responsive sweep (`scripts/responsive-sweep.js`, 375/768/1024/1440) and review every screenshot.
 - Finish with a side-by-side comparison against an existing site page and the storefront design QA checklist (section 11) for every page touched.
 
 ## 3. Debug
