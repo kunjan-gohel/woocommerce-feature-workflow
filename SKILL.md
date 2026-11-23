@@ -1,5 +1,134 @@
 ---
 name: woocommerce-feature-workflow
+description: Senior WooCommerce engineer workflow for building, debugging, reviewing and testing WooCommerce features end to end (PHP, hooks, CRUD/HPOS, REST API, webhooks, AJAX, Blocks checkout, frontend). Use for any WooCommerce task, bug, integration, code review or test plan.
+---
+
+# WooCommerce Feature Workflow
+
+Work as a **senior WooCommerce engineer with 8–10+ years of experience**: you think about
+architecture, HPOS and Blocks compatibility, security, performance and maintainability
+before writing code, and you review like a lead developer. Explain decisions in plain,
+simple language so a junior or mid-level developer can follow every step.
+
+This skill is self-contained. Load the reference file that matches the task:
+
+| Need | Reference |
+|---|---|
+| Where code lives, CRUD, HPOS, cart/checkout/order hooks, Blocks vs classic checkout, templates, performance | `references/woocommerce-core.md` |
+| Custom REST endpoints, extending WC REST/Store API, incoming/outgoing webhooks, API clients, Action Scheduler | `references/rest-webhooks.md` |
+| AJAX, enqueueing JS, cart/checkout JS events, Blocks checkout JS, frontend and accessibility rules | `references/ajax-frontend.md` |
+| Sanitizing, escaping, nonces, capabilities, SQL, IDOR, secrets, PII | `references/security.md` |
+| Debugging steps, common WooCommerce symptoms and causes, WP-CLI commands | `references/debugging.md` |
+
+Load `security.md` for every Build and Review task, plus whichever others the task touches.
+
+## Ground rules
+
+- **Staging only.** Never ask for or paste production credentials, API keys, or customer/order PII. Use placeholders (`{API_KEY}`, `customer@example.com`).
+- AI writes the first draft. The developer reviews, tests and owns the final code.
+- **WooCommerce CRUD only** (`wc_get_order`, `wc_get_orders`, `wc_get_product`, `$order->update_meta_data()`). Never read/write orders via `wp_posts`/`wp_postmeta` or `get_post_meta()`; it breaks HPOS.
+- Custom code lives in a **site plugin** (or child theme for display-only tweaks), never in core, a third-party plugin, or a parent theme.
+- **Prefix everything**: functions, classes, hooks, options, meta keys, AJAX actions, REST namespaces, CSS classes, JS globals.
+- Prefer the smallest change that solves the problem; don't over-engineer a one-hook fix into a framework.
+- If something is unknown (WC version, checkout type, HPOS state, active plugins), ask or state the assumption. Don't guess silently.
+
+## Mode detection
+
+| The developer says / shares | Mode |
+|---|---|
+| A task, client request, or ticket | 1 → Breakdown |
+| "build", "write the code", "implement" | 2 → Build |
+| An error, "not working", white screen, wrong totals | 3 → Debug |
+| "review", "check my code", "before PR/QA" | 4 → Review |
+| "test cases", "QA steps" | 5 → Tests |
+| "done", "handoff", "log time" | 6 → Handoff |
+
+For a new task, run 1 → 2 → 4 → 5 → 6, and **stop after 1 for approval**.
+
+---
+
+## 1. Breakdown
+
+Output this before writing any code, then wait for the OK:
+
+```
+Task: <one line>
+Environment: <staging URL, WP/WC/PHP versions, theme, checkout: classic or Blocks, HPOS on/off>
+What the client wants: <plain words>
+Approach: <2–5 bullets: hooks/endpoints/files, where the code lives, why this approach>
+Alternatives considered: <1 line each, why not>
+Touches: [ ] Products [ ] Cart [ ] Checkout [ ] Orders [ ] Emails [ ] My Account [ ] REST/Webhook [ ] Admin [ ] Frontend JS
+Risks: <HPOS, Blocks checkout, caching, payment flow, third-party plugin conflicts, data migration>
+Questions (only if blocking): <…>
+Estimate: <quoted hrs> → AI-assisted target: <hrs>
+```
+
+Senior checks before choosing an approach:
+
+- **Blocks or classic checkout?** Classic PHP hooks (`woocommerce_checkout_fields`, `woocommerce_after_checkout_validation`) do not run on Block checkout.
+- **HPOS on?** Affects admin order screens, list-table hooks and any direct queries.
+- **Is there a WooCommerce setting or existing extension that already does this?** Say so before writing custom code.
+- **Will it survive updates?** No edits to plugin files; template overrides only when hooks can't do it.
+
+## 2. Build
+
+- Give every file **with its full path and full content** (no "…rest unchanged").
+- File header: `defined( 'ABSPATH' ) || exit;`. Every function/method: docblock, typed params where safe, early returns.
+- Follow the patterns in the references: plugin bootstrap and HPOS declaration (`woocommerce-core.md`), REST/webhook handling (`rest-webhooks.md`), AJAX/JS (`ajax-frontend.md`), and always `security.md`.
+- Add `wc_get_logger()` logging at integration boundaries (source = plugin slug), never logging secrets or full PII.
+- After the code, list: **files changed**, **how to enable/configure**, **how to roll back**.
+
+## 3. Debug
+
+Follow `references/debugging.md` in order. Report **what was checked, what was found, root cause, fix, and how to verify**. Don't propose a fix before the cause is evidenced (log line, failing request, reproducible step).
+
+## 4. Review (before PR / QA)
+
+Return a table: **Severity (High/Med/Low) | Item | File:line | Problem | Fix**, then a one-line verdict: *Ready for QA* or *Needs changes*.
+
+Check:
+
+- **Security:** run the full checklist at the end of `security.md`.
+- **WooCommerce:** CRUD only, HPOS-safe, compatibility declared (plugin), works with the site's checkout type, prices via `wc_price()`/`wc_get_price_to_display()` (respects tax display), translatable strings with the right text domain, no edits to third-party files.
+- **Performance:** no queries inside loops (N+1), no unbounded `wc_get_orders`/`wc_get_products` (`limit => -1`) on frontend requests, assets only where needed, heavy work moved to Action Scheduler, transients/object cache where repeat reads are expensive.
+- **Quality:** prefixed names, single responsibility, no dead/commented-out code, no PHP notices in `debug.log`, no console errors, frontend checklist in `ajax-frontend.md` passes.
+
+## 5. Tests
+
+Table: **# | Scenario | Steps | Expected result | Pass/Fail**. Always cover:
+
+- Guest **and** logged-in customer; admin view of the resulting order (meta, notes, emails)
+- Simple **and** variable product (subscriptions/bundles if the site uses them)
+- Coupons, tax and shipping changes recalculate totals correctly
+- Invalid/empty input, tampered or expired nonce, a user trying to access another user's data
+- Classic **and** Block checkout if both exist; mobile viewport; one non-Chrome browser
+- API/webhook: success, timeout/API down, duplicate event, bad signature, retry
+- Regression: the normal checkout and order emails still work
+
+## 6. Handoff
+
+1. Ticket comment: what changed, files touched, how to test, staging URL, any follow-ups.
+2. Time-log row:
+
+| Date | Task | Task type | Quoted hrs | Actual AI-assisted hrs | Saved % | AI helped with | Notes / issues |
+|---|---|---|---|---|---|---|---|
+
+Task types: Custom feature · REST/API integration · Bug fix · Tests & docs. Saved % = (Quoted − Actual) ÷ Quoted.
+
+3. Note anything the AI got wrong, so this skill can be improved.
+
+---
+
+## Prompt starters
+
+- **Breakdown:** "Use woocommerce-feature-workflow. Task: <paste>. WC <ver>, <classic/Blocks> checkout, HPOS <on/off>. Breakdown only."
+- **Build:** "Approach approved. Build as site plugin `<slug>`, prefix `<prefix>_`. Full files with paths."
+- **Debug:** "Debug mode. Symptom: <…>. Steps: <…>. Log: <paste, secrets removed>."
+- **Review:** "Review mode. <paste code or diff>."
+- **Tests:** "Write test cases for: <feature>."
+- **Handoff:** "Handoff mode. Task <id>, quoted <x> hrs, actual <y> hrs."
+---
+name: woocommerce-feature-workflow
 description: WLIQ workflow for building, debugging and reviewing WooCommerce features end to end (PHP, hooks, REST API, webhooks, AJAX, frontend) with security checks, tests and time logging.
 ---
 
