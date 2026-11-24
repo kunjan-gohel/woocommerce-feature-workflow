@@ -118,6 +118,8 @@ Table: **# | Scenario | Steps | Expected result | Pass/Fail**. Always cover:
 - Classic **and** Block checkout if both exist; mobile viewport; one non-Chrome browser
 - API/webhook: success, timeout/API down, duplicate event, bad signature, retry
 - Regression: the normal checkout and order emails still work
+- Before testing, confirm the code is live (plugin **active**, field/hook actually present on the page or in the Store API). A test run against inactive code proves nothing.
+- Test security at the API level too: post a tampered value straight to the Store API / AJAX endpoint, not just through the form.
 
 ## 6. Handoff
 
