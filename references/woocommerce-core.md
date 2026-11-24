@@ -173,7 +173,16 @@ add_action( 'woocommerce_init', function () {
 } );
 ```
 
-  The value is saved on the order automatically and shown in admin and emails. Verify the stored meta key on staging before reading it in custom code.
+  The value is saved on the order automatically and shown in admin, emails, the thank-you page and My Account order view. Verify the stored meta key on staging before reading it in custom code.
+
+  Proven on a real build (WC 11.3, HPOS on):
+  - Stored meta key is `_wc_other/{id}` for `location => 'order'` (e.g. `_wc_other/wliq/training-location`), saved via CRUD.
+  - `select` options are `array( array( 'value' => 'slug', 'label' => 'Label' ) )`. An optional select gets an automatic "Select a … (optional)" first option.
+  - The Store API already rejects a value outside the options (`400 rest_invalid_param`). Still add `woocommerce_validate_additional_field` as a second check for custom rules.
+  - Store the stable value (slug), not the label. If an option is later removed, old orders show the stored value, so keep values stable.
+  - Options built from posts: cache them (transient) and clear on `save_post_{type}`, `trashed_post` and `before_delete_post` (not `deleted_post`: the post is gone and `get_post_type()` returns false).
+  - The checkout page must contain the `woocommerce/checkout-additional-information-block` for order-location fields to render (default on pages built with WC 8.9+; add it in the editor on older checkout pages).
+  - Unknown `additional_fields` keys are ignored by the Store API. If the plugin is inactive, orders still go through without the field, so confirm the field renders before testing.
 - Server-side data for Blocks UI: extend the Store API (`woocommerce_store_api_register_endpoint_data`), see `rest-webhooks.md`.
 - Never rely only on classic checkout hooks if the site uses Blocks; test both if both exist.
 
