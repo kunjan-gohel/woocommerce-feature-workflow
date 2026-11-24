@@ -56,4 +56,4 @@ scripts/
 
 ## Status
 
-v3.6: self-contained, senior-level standard, with storefront design that matches the existing site, 20+ known gotchas from real tests, and a responsive sweep script. Part of the WLIQ Pod B AI plan (Dec 31 goal); refined as it is used on real WooCommerce tasks.
+v3.7: self-contained, senior-level standard, with storefront design that matches the existing site, 20+ known gotchas from real tests, a responsive sweep script, and lessons from a full Breakdown → Handoff test (Blocks checkout field). Part of the WLIQ Pod B AI plan (Dec 31 goal); refined as it is used on real WooCommerce tasks.
