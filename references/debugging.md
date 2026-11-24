@@ -27,6 +27,8 @@ Work in order. Don't change code until the cause is evidenced.
 |---|---|
 | Checkout spins forever / "error processing order" | PHP fatal in log during `?wc-ajax=checkout`; payment gateway response; a plugin echoing output (breaks JSON) |
 | Custom checkout field not saving | Site uses **Blocks checkout** but code uses classic hooks |
+| Additional checkout field not showing on Blocks checkout | Plugin not active (check Plugins list or REST `wp/v2/plugins`), WC older than 8.9, or the checkout page lacks the Additional information block |
+| Plugin File Editor change "reverted" | WordPress loopback request failed (common on staging behind auth or a firewall). Deliver changes as a new plugin zip and upload/replace instead |
 | Cart empties / random logouts | Cart pages cached; session cookie stripped by CDN; mixed http/https |
 | Wrong prices or totals | Multiple `woocommerce_before_calculate_totals` callbacks (runs more than once; guard with `did_action()`), tax display settings, rounding |
 | Order meta missing in admin | Code uses `get_post_meta()` / `update_post_meta()` while **HPOS is on** |
